@@ -1,15 +1,34 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
-import java.util.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class MorseCodeConverter extends JFrame implements Requirements {
     private JFrame frame;
     private JPanel inputPanel, outputPanel, buttonPanel;
     private JTextArea inputArea, outputArea;
-    private JButton convertButton, swapButton, clearButton, homeButton;
+    private JButton convertButton, swapButton, clearButton, homeButton, Instruc;
+    private State state;
 
-    public MorseCodeConverter() {
+    private static final char errorChar = '*';
+
+    private void initState() {
+        this.state = State.TEXT_TO_MORSE;
+    }
+
+    private void changeState() {
+        if (this.state.equals(State.TEXT_TO_MORSE)) {
+            this.state = State.MORSE_TO_TEXT;
+            inputArea.setText(""); // clear the input area when switching to Morse-to-text mode
+        } else {
+            this.state = State.TEXT_TO_MORSE;
+            outputArea.setText(""); // clear the output area when switching to text-to-Morse mode
+        }
+        convert();
+    }
+
+    public void MorseCodeConverter() {
+        initState();
 
         //Create the main frame
         frame = new JFrame("Morse Code Converter");
@@ -31,13 +50,18 @@ public class MorseCodeConverter extends JFrame implements Requirements {
         JScrollPane outputScrollPane = new JScrollPane(outputArea);
         outputPanel.add(outputLabel, BorderLayout.NORTH);
         outputPanel.add(outputScrollPane, BorderLayout.CENTER);
+        outputArea.setEditable(false);
 
         // Create the button panel
         buttonPanel = new JPanel(new FlowLayout());
         convertButton = new JButton("Convert");
         convertButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                convert();
+                try {
+                    convert();
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(frame, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
             }
         });
         swapButton = new JButton("Swap");
@@ -56,7 +80,15 @@ public class MorseCodeConverter extends JFrame implements Requirements {
         homeButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 frame.dispose();
-               home home = new home();
+                Home home = new Home();
+            }
+        });
+
+        Instruc = new JButton("instruction");
+        Instruc.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                frame.dispose();
+                InstructionsMorseConvert instruc = new InstructionsMorseConvert();
             }
         });
 
@@ -64,7 +96,7 @@ public class MorseCodeConverter extends JFrame implements Requirements {
         buttonPanel.add(swapButton);
         buttonPanel.add(clearButton);
         buttonPanel.add(homeButton);
-
+        buttonPanel.add(Instruc);
 
         // Add the panels to the frame
         frame.add(inputPanel, BorderLayout.WEST);
@@ -78,7 +110,7 @@ public class MorseCodeConverter extends JFrame implements Requirements {
 
     @Override
     public String[] groepsleden() {
-        return new String[]{"Member 1", "Member 2", "Member 3"};
+        return new String[]{"Arvan Jagroep", "Jeremiah Fraser", "Aditya Dhanes", "Joshua Atmosoerodjo"};
     }
 
     @Override
@@ -196,33 +228,37 @@ public class MorseCodeConverter extends JFrame implements Requirements {
             case "--..":
                 return 'z';
             default:
-                return ' ';
+                return errorChar;
         }
     }
 
     @Override
     public void convert() {
-        String input = inputArea.getText();
-        String output = "";
-        for (int i = 0; i < input.length(); i++) {
-            char c = input.charAt(i);
-            if (c == ' ') {
-                output += " ";
-            } else {
-                output += abs2morse(c) + " ";
-            }
-        }
-        outputArea.setText(output);
-    }
 
+        if (state.equals(State.TEXT_TO_MORSE)) {
+            String input = inputArea.getText().trim();
+            if (input.isEmpty()) {
+                return;
+            }
+            StringBuilder output = new StringBuilder();
+            for (int i = 0; i < input.length(); i++) {
+                char inputChar = input.charAt(i);
+                output.append(abs2morse(inputChar));
+            }
+            outputArea.setText(output.toString());
+        } else {
+            String input = outputArea.getText().trim();
+            String output = inputArea.getText().trim();
+
+            inputArea.setText(input);
+            outputArea.setText(output);
+        }
+    }
 
 
     @Override
     public void swap() {
-        String input = inputArea.getText();
-        String output = outputArea.getText();
-        inputArea.setText(output);
-        outputArea.setText(input);
+        changeState();
     }
 
     @Override
@@ -233,20 +269,21 @@ public class MorseCodeConverter extends JFrame implements Requirements {
 
     @Override
     public String exampleMorseCode() {
-        return "-.-- --- ..-";
+        return "..- -. .- ... .- -";
     }
 
     @Override
     public String exampleString() {
-        return "you";
+        return "Unasat";
     }
 
     @Override
     public String explain() {
-        return "This program allows you to convert text to Morse code and vice versa.";
+        return "1. Enter a message in the input box\n2. " +
+                "Click the Convert button to convert to Morse Code\n3. " +
+                "Click the Clear button to clear the input box and output box.\n4 " +
+                "For example with " + exampleString() + " you get" + exampleMorseCode() + " converted.";
     }
 
-//    public static void main(String[] args) {
-//        new MorseCodeConverter();
-//    }
+
 }

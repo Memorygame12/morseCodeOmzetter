@@ -45,17 +45,17 @@ public class UnitConverter extends JFrame {
                 double convertedValue = convert(value, fromUnit, toUnit);
                 toField.setText(Double.toString(convertedValue));
 
-                
+
             }
         });
 
         homeButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 frame.dispose();
-                   new home();
+                new Home();
 
-                }
-            
+            }
+
         });
 
 
